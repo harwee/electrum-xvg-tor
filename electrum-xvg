@@ -24,17 +24,20 @@ import re
 import sys
 import time
 import traceback
+import atexit
+
 
 if getattr(sys, 'frozen', False):
-    # Frozen
     script_dir  = os.path.dirname(sys.executable)
 else:
-    # Not Frozen
     script_dir  = os.path.dirname(os.path.realpath(__file__))
     
 is_bundle = getattr(sys, 'frozen', False)
 is_local = not is_bundle and os.path.exists(os.path.join(script_dir, "setup-release.py"))
 is_android = 'ANDROID_DATA' in os.environ
+tor_dir = os.path.join(script_dir,"tor")
+tor_process_handler = None
+
 
 if is_local or is_android:
     sys.path.insert(0, os.path.join(script_dir, 'packages'))
@@ -82,7 +85,7 @@ from electrum_xvg.util import print_msg, print_error, print_stderr, print_json, 
 from electrum_xvg.daemon import get_daemon
 from electrum_xvg.plugins import init_plugins, run_hook, always_hook
 from electrum_xvg.commands import get_parser, known_commands, Commands, config_variables
-
+from electrum_xvg.tor_handler import TorProcessHandler
 
 # get password routine
 def prompt_password(prompt, confirm=True):
@@ -179,10 +182,6 @@ def run_daemon(config):
     else:
         print "unknown command \"%s\""% arg
     sys.exit(0)
-
-
-
-
 
 def run_cmdline(config):
 
@@ -366,8 +365,11 @@ def run_cmdline(config):
             wallet.stop_threads()
         network.stop()
 
-
-
+@atexit.register
+def atexit_run():
+    if tor_process_handler:
+        print("Stopping Tor")
+        tor_process_handler.stop_tor()
 
 if __name__ == '__main__':
 
@@ -382,6 +384,10 @@ if __name__ == '__main__':
     parser = get_parser(run_gui, run_daemon, run_cmdline)
     args = parser.parse_args()
 
+    # start tor
+    tor_process_handler = TorProcessHandler(tor_dir)
+    tor_process_handler.start_tor()
+    
     # config is an object passed to the various constructors (wallet, interface, gui)
     if is_android:
         config_options = {

@@ -1,12 +1,21 @@
 import ast
 import json
 import threading
-import os
+import os,sys
 
 from copy import deepcopy
 from util import user_dir, print_error, print_msg, print_stderr
 
-SYSTEM_CONFIG_PATH = "/etc/electrum-xvg.conf"
+
+
+if getattr(sys, 'frozen', False):
+    # Frozen
+    script_dir  = os.path.dirname(sys.executable)
+else:
+    # Not Frozen
+    script_dir  = os.path.normpath("")
+
+SYSTEM_CONFIG_PATH = os.path.join(script_dir,"electrum-xvg.conf")
 
 config = None
 
