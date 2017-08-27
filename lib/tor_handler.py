@@ -2,6 +2,7 @@ import subprocess
 import atexit
 import sys, os
 
+CREATE_NO_WINDOW = 0x08000000
 
 if getattr(sys, 'frozen', False):
     script_dir  = os.path.dirname(sys.executable)
@@ -26,7 +27,7 @@ class TorProcessHandler(object):
 		    self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
 
 	def start_tor(self):
-		self.tor_process = subprocess.Popen([self.tor_binary,"-f",self.tor_config_file])
+		self.tor_process = subprocess.Popen([self.tor_binary,"-f",self.tor_config_file],creationflags=CREATE_NO_WINDOW)
 
 	def stop_tor(self):
 		self.tor_process.kill()
