@@ -20,7 +20,8 @@ class TorProcessHandler(object):
 		    self.tor_binary = "tor"
 		    self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
 		elif sys.platform == "darwin":
-		    pass
+		    self.tor_binary = "tor"
+		    self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
 		elif sys.platform == "win32":
 		    self.tor_binary = os.path.join(os.path.join(tor_dir,"windows"),"tor.exe")
 		    self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
