@@ -15,8 +15,10 @@ tor_dir = os.path.join(script_dir,"tor")
 class TorProcessHandler(object):
 
 	def __init__(self,tor_dir):
+		print(sys.platform)
 		if sys.platform == "linux" or sys.platform == "linux2":
-		    pass
+		    self.tor_binary = "tor"
+		    self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
 		elif sys.platform == "darwin":
 		    pass
 		elif sys.platform == "win32":
@@ -26,6 +28,7 @@ class TorProcessHandler(object):
 	def start_tor(self):
 		print(" ".join([self.tor_binary,"-f",self.tor_config_file]))
 		self.tor_process = subprocess.Popen([self.tor_binary,"-f",self.tor_config_file])
+		print(" ".join([self.tor_binary,"-f",self.tor_config_file]))
 
 	def stop_tor(self):
 		self.tor_process.kill()
