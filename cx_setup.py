@@ -5,7 +5,7 @@ from cx_Freeze import setup, Executable
 # create executable using command `python cx_setup.py build`
 
 
-buildOptions = dict(packages = ["idna","shutil","ltc_scrypt","argparse","dns","gui","dbhash","dumbdbm","ConfigParser"], excludes = [], include_files=["lib","electrum-xvg.conf"])
+buildOptions = dict(packages = ["idna","shutil","ltc_scrypt","argparse","dns","gui","dbhash","dumbdbm","ConfigParser","mmap","plugins"], excludes = [], include_files=["tor","lib","electrum-xvg.conf"])
  
 import sys
 base = 'Win32GUI' if sys.platform=='win32' else None
