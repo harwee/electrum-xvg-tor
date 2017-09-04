@@ -5,7 +5,7 @@ import sys, os, shutil
 from urllib import urlopen, urlretrieve
 from zipfile import ZipFile
 import json,re 
-import subprocess
+import subprocess, time
 
 CREATE_NO_WINDOW = 0x08000000
 
@@ -36,17 +36,22 @@ class TorProcessHandler(object):
             self.tor_config_file = os.path.join(os.path.join(tor_dir,"torrc"))
 
     def start_tor(self,retries=0):
+        startupinfo = None
+        if sys.platform == "win32":
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
     	if self.tor_installation_run_retries>=2:
-    		raise TorNotStarted("Tor cannot be started by Verge Wallet. It may be already running or not properly installed")
+    		raise TorNotStarted("Tor cannot be started by Verge Wallet. Tor may not be in the PATH or not properly installed")
         try:
-            self.tor_process = subprocess.Popen([self.tor_binary,"-f",self.tor_config_file],creationflags=CREATE_NO_WINDOW)
-        except WindowsError:
-            pass
-        try:
-            self.tor_process = subprocess.Popen([self.tor_binary_alternative,"-f",self.tor_config_file],creationflags=CREATE_NO_WINDOW)
-        except WindowsError:
-            self.download_tor() ## Valid only for Windows
-            self.install_tor() ## Copies download files from self.download_tor for Windows and install using shell for Linux and OSX
+            self.tor_process = subprocess.Popen([self.tor_binary,"-f",self.tor_config_file],startupinfo=startupinfo)
+        except Exception as e:
+            print(e)
+            try:
+                self.tor_process = subprocess.Popen([self.tor_binary_alternative,"-f",self.tor_config_file],startupinfo=startupinfo)
+            except Exception as e:
+                self.download_tor() ## Valid only for Windows
+                self.install_tor() ## Copies download files from self.download_tor for Windows and install using shell for Linux and OSX
             
     def stop_tor(self):
         self.tor_process.kill()       
@@ -92,9 +97,14 @@ class TorProcessHandler(object):
                 shutil.rmtree(self.temp_download_dir)
             except Exception as e:
                 print(e)
+        elif sys.platform == "darwin":
+            subprocess.call("brew install tor".split())
+
         self.tor_installation_run_retries +=1
         self.start_tor(retries=self.tor_installation_run_retries)
       
 if __name__ == "__main__":
-	torhandler = TorProcessHandler("../tor")
-	torhandler.start_tor()
+    torhandler = TorProcessHandler("../tor")
+    torhandler.start_tor()
+    time.sleep(10)
+    torhandler.stop_tor()
