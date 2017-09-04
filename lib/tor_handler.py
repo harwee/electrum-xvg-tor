@@ -52,7 +52,6 @@ class TorProcessHandler(object):
         if self.tor_installation_run_retries>=2:
             print("Tor cannot be started by Verge Wallet. Tor may not be in the PATH or not properly installed, Try to install Tor manually")
 
-        self.download_tor() ## Valid only for Windows
         self.install_tor() ## Copies download files from self.download_tor for Windows and install using shell for Linux and OSX
             
     def stop_tor(self):
@@ -76,10 +75,11 @@ class TorProcessHandler(object):
             return base_url+"tor-linux{}-debug.zip".format(platform.architecture()[0].replace("bit",""))
         else:
             print("Not a supported platform to autoinstall Tor, please install Tor manually")
+            return
 
-    def download_tor(self,bundle_version=None, download_linux=False):
+    def download_tor(self,bundle_version=None):
 
-        if sys.platform == "darwin" or not download_linux:
+        if sys.platform != "win32":
             return
 
         if not bundle_version:
@@ -88,12 +88,13 @@ class TorProcessHandler(object):
         self.temp_download_dir = os.path.join(self.tor_dir,"temp")
         if not os.path.exists(self.temp_download_dir):
             os.mkdir(self.temp_download_dir)
-
+        print("YAYAY")
         self.tor_zip_file_path = os.path.join(self.temp_download_dir,download_url.strip().strip("/").split("/")[-1])
         urlretrieve(download_url,self.tor_zip_file_path)
 
     def install_tor(self):
         if sys.platform == "win32":
+            self.download_tor()
             try:
                 torzip = ZipFile(self.tor_zip_file_path,"r")
                 torzip.extractall(self.tor_dir)

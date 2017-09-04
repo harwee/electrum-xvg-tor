@@ -386,6 +386,7 @@ if __name__ == '__main__':
 
     # start tor
     tor_process_handler = TorProcessHandler(tor_dir)
+    print "Starting Tor"
     tor_process_handler.start_tor()
     
     # config is an object passed to the various constructors (wallet, interface, gui)
