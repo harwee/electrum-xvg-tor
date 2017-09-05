@@ -16,3 +16,7 @@ locale/
 packages
 env/
 .tox/
+tor/Tor
+tor/Data
+*.egg-info
+log.txt
